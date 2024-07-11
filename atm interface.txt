@@ -1,0 +1,201 @@
+/**
+ * ATM SYSTEM
+ * Developed By : S.KAVITHA
+ */
+import java.util.*;
+
+class Account {
+    String accountNumber;
+    String accountName;
+    double balance;
+    static int id = 100;
+    
+    Account() {}
+    
+    Account(String name, double amount) {
+        id++;
+        accountNumber = String.valueOf(id);
+        accountName = name;
+        balance = amount;
+    }
+    
+    void getDetails() {
+        id++;
+        accountNumber = String.valueOf(id);
+        
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("\tEnter Account Name : ");
+        accountName = scanner.nextLine();
+        
+        System.out.print("\tEnter Initial Balance : ");
+        balance = scanner.nextDouble();
+    }
+    
+    void deposit(double amount) {
+        balance += amount;
+        System.out.println("\tSuccess! Amount deposited into " + this.accountName + " account.\n\tAvailable Balance: " + balance + "\n");
+    }
+    
+    void withdraw(double amount) {
+        if (amount > balance) {
+            System.out.println("Insufficient Funds!!");
+        } else {
+            balance -= amount;
+            System.out.println("\tAmount withdrawn! Available Balance: " + balance + "\n");
+        }
+    }
+    
+    void balance() {
+        System.out.println("\tBalance available in Account Number " + accountNumber + " is: " + balance);
+    }
+    
+    @Override
+    public String toString() {
+        return "\n\tAccount Details" +
+               "\n\t---------------" +
+               "\n\tNumber\t: " + accountNumber +
+               "\n\tName\t: " + accountName +
+               "\n\tBalance\t: " + String.format("%,.2f", balance) +
+               "\n";
+    }
+}
+
+class ATMApplication {
+    static HashMap<String, Account> accounts = new HashMap<>();
+    static Account selectedAccount;
+
+    public static void main(String[] args) {
+        System.out.println("\t////////////////////////////////////////////////////////////");
+        System.out.println("\t//////////////////// Welcome to ATM ///////////////////////");
+        System.out.println("\t////////////////////////////////////////////////////////////");
+
+        // Adding some initial accounts
+        createInitialAccounts();
+        
+        ATMApplication app = new ATMApplication();
+        app.adminAction();
+    }
+    
+    static void createInitialAccounts() {
+        accounts.put("101", new Account("Kutti", 10000));
+        accounts.put("102", new Account("KeeKe", 20000));
+        accounts.put("103", new Account("Maaya", 30000));
+        accounts.put("104", new Account("Alexa", 40000));
+        accounts.put("105", new Account("Priya", 50000));
+    }
+    
+    void adminAction() {
+        boolean entry = true;
+        Scanner scanner = new Scanner(System.in);
+        
+        while (entry) {
+            System.out.println("\n\t##### MAIN CHOICES :=> \t" +
+                               "1 - List Accounts" + "\t" +
+                               "2 - Add Account" + "\t" +
+                               "3 - Open Account" + "\t" +
+                               "4 - Delete Account" + "\t" +
+                               "5 - Exit");
+            System.out.print("\n\tSelect Choice: ");
+            int ch = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (ch) {
+                case 1:
+                    showList();
+                    break;
+                case 2:
+                    Account account = new Account();
+                    account.getDetails();
+                    accounts.put(account.accountNumber, account);
+                    System.out.println("\n\tAdded successfully. Account Number: " + account.accountNumber);
+                    System.out.print("\n\tDo you want to continue with this account (Y/N)? ");
+                    String choice = scanner.nextLine();
+                    if (choice.equalsIgnoreCase("y")) {
+                        selectedAccount = account;
+                        accountAction();
+                    }
+                    break;
+                case 3:
+                    System.out.print("\tEnter Account Number to Open: ");
+                    String openAccountNumber = scanner.nextLine();
+                    if (accounts.containsKey(openAccountNumber)) {
+                        selectedAccount = accounts.get(openAccountNumber);
+                        System.out.println("\t" + selectedAccount);
+                        accountAction();
+                    } else {
+                        System.out.println("\tAccount Not Found.");
+                    }
+                    break;
+                case 4:
+                    System.out.print("\tEnter Account Number to Delete: ");
+                    String deleteAccountNumber = scanner.nextLine();
+                    if (accounts.containsKey(deleteAccountNumber)) {
+                        System.out.println("\t" + accounts.get(deleteAccountNumber));
+                        System.out.println("\tAbove Account Removed");
+                        accounts.remove(deleteAccountNumber);
+                    } else {
+                        System.out.println("\tAccount Not Found.");
+                    }
+                    break;
+                case 5:
+                    entry = false;
+                    System.out.println("\t////////////////////////////////////////////////////////////");
+                    System.out.println("\t//////////////////// Thanks for Using ATM ///////////////////");
+                    System.out.println("\t////////////////////////////////////////////////////////////");
+                    break;
+                default:
+                    System.out.println("\tEnter a valid Option!");
+            }
+        }
+    }
+    
+    void accountAction() {
+        boolean entry = true;
+        Scanner scanner = new Scanner(System.in);
+        
+        while (entry) {
+            System.out.println("\n\t##### " + selectedAccount.accountName.toUpperCase() + "'s CHOICES :=> \t" +
+                               "1 - Balance Check" + "\t" +
+                               "2 - Deposit" + "\t" +
+                               "3 - Withdraw" + "\t" +
+                               "4 - Exit");
+            System.out.print("\n\tSelect Choice: ");
+            int ch = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (ch) {
+                case 1:
+                    selectedAccount.balance();
+                    break;
+                case 2:
+                    System.out.print("\tEnter Deposit Amount: ");
+                    double depositAmount = scanner.nextDouble();
+                    selectedAccount.deposit(depositAmount);
+                    break;
+                case 3:
+                    System.out.print("\tEnter Withdraw Amount: ");
+                    double withdrawAmount = scanner.nextDouble();
+                    selectedAccount.withdraw(withdrawAmount);
+                    break;
+                case 4:
+                    System.out.println("\t" + selectedAccount.accountName + "'s account action closed...");
+                    selectedAccount = null;
+                    entry = false;
+                    break;
+                default:
+                    System.out.println("\tInvalid Selection! Please select the correct option.");
+            }
+        }
+    }
+    
+    void showList() {
+        System.out.println("\t************** LIST OF ACCOUNTS **************");
+        System.out.println("\t----------------------------------------------");
+        System.out.println("\tNumber\tName\tBalance");
+        System.out.println("\t----------------------------------------------");
+        for (Account account : accounts.values()) {
+            System.out.println("\t" + account.accountNumber + "\t" + account.accountName + "\t" + String.format("%,.2f", account.balance));
+        }
+        System.out.println("\t----------------------------------------------");
+    }
+}
